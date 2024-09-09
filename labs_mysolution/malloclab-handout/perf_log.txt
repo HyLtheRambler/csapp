@@ -1,0 +1,174 @@
+*********************************
+*** Using implicit & Next fit ***
+*********************************
+Using default tracefiles in ./traces/
+Measuring performance with a cycle counter.
+Processor clock rate ~= 2500.0 MHz
+.............................
+Results for mm malloc:
+  valid  util   ops    secs     Kops  trace
+   yes    77%  100000  0.001961 51003 ./traces/alaska.rep
+ * yes    91%    4805  0.002622  1833 ./traces/amptjp.rep
+ * yes    76%    4162  0.000124 33531 ./traces/bash.rep
+ * yes    56%   57716  0.016709  3454 ./traces/boat.rep
+ * yes    92%    5032  0.001782  2823 ./traces/cccp.rep
+ * yes    72%   11991  0.000639 18774 ./traces/chrome.rep
+ * yes    99%   20000  0.000275 72617 ./traces/coalesce-big.rep
+   yes    66%   14400  0.000140102698 ./traces/coalescing-bal.rep
+   yes   100%      15  0.000005  3070 ./traces/corners.rep
+ * yes    95%    5683  0.004685  1213 ./traces/cp-decl.rep
+ u yes    71%      --        --    -- ./traces/exhaust.rep
+ * yes    72%    8000  0.000339 23594 ./traces/firefox.rep
+   yes    80%   99804  0.344493   290 ./traces/firefox-reddit.rep
+   yes    75%     118  0.000004 26818 ./traces/hostname.rep
+ * yes    90%   19405  0.004859  3994 ./traces/login.rep
+ * yes    63%     200  0.000005 39968 ./traces/lrucd.rep
+   yes    88%     372  0.000015 24287 ./traces/ls.rep
+   yes    34%      10  0.000003  3264 ./traces/malloc.rep
+   yes    28%      17  0.000002  6986 ./traces/malloc-free.rep
+ u yes    99%      --        --    -- ./traces/needle.rep
+ * yes    76%     200  0.000012 16843 ./traces/nlydf.rep
+   yes    81%    1494  0.000069 21534 ./traces/perl.rep
+ * yes    57%     200  0.000006 32072 ./traces/qyqyc.rep
+ * yes    91%    4800  0.004918   976 ./traces/random.rep
+ * yes    89%    4800  0.005169   929 ./traces/random2.rep
+ * yes    79%     147  0.000009 16158 ./traces/rm.rep
+ * yes    68%     200  0.000006 30864 ./traces/rulsr.rep
+ p yes     --    6495  0.001416  4585 ./traces/seglist.rep
+   yes    89%      12  0.000007  1625 ./traces/short2.rep
+18 17     80%  153836  0.043576  3530
+
+Perf index = 38 (util) & 11 (thru) = 48/100
+
+*********************************
+*** Using implicit & first fit **
+*********************************
+Using default tracefiles in ./traces/
+Measuring performance with a cycle counter.
+Processor clock rate ~= 2500.0 MHz
+.............................
+Results for mm malloc:
+  valid  util   ops    secs     Kops  trace
+   yes    86%  100000  0.005645 17716 ./traces/alaska.rep
+ * yes    99%    4805  0.009335   515 ./traces/amptjp.rep
+ * yes    83%    4162  0.003112  1337 ./traces/bash.rep
+ * yes    56%   57716  2.868150    20 ./traces/boat.rep
+ * yes    99%    5032  0.008505   592 ./traces/cccp.rep
+ * yes    74%   11991  0.037689   318 ./traces/chrome.rep
+ * yes    99%   20000  0.001654 12094 ./traces/coalesce-big.rep
+   yes    66%   14400  0.000096150655 ./traces/coalescing-bal.rep
+   yes   100%      15  0.000004  3970 ./traces/corners.rep
+ * yes    99%    5683  0.014430   394 ./traces/cp-decl.rep
+ u yes    71%      --        --    -- ./traces/exhaust.rep
+ * yes    75%    8000  0.013542   591 ./traces/firefox.rep
+   yes    82%   99804 18.768561     5 ./traces/firefox-reddit.rep
+   yes    75%     118  0.000017  6968 ./traces/hostname.rep
+ * yes    90%   19405  0.218353    89 ./traces/login.rep
+ * yes    63%     200  0.000008 26236 ./traces/lrucd.rep
+   yes    88%     372  0.000077  4841 ./traces/ls.rep
+   yes    34%      10  0.000002  4108 ./traces/malloc.rep
+   yes    28%      17  0.000002  6972 ./traces/malloc-free.rep
+ u yes    99%      --        --    -- ./traces/needle.rep
+ * yes    89%     200  0.000016 12694 ./traces/nlydf.rep
+   yes    86%    1494  0.001346  1110 ./traces/perl.rep
+ * yes    57%     200  0.000009 21410 ./traces/qyqyc.rep
+ * yes    92%    4800  0.008919   538 ./traces/random.rep
+ * yes    92%    4800  0.008782   547 ./traces/random2.rep
+ * yes    79%     147  0.000025  5894 ./traces/rm.rep
+ * yes    68%     200  0.000009 22357 ./traces/rulsr.rep
+ p yes     --    6495  0.025308   257 ./traces/seglist.rep
+   yes    89%      12  0.000007  1630 ./traces/short2.rep
+18 17     82%  153836  3.217846    48
+
+Perf index = 43 (util) & 0 (thru) = 43/100
+
+*********************************
+*** Using explicit & first fit **
+*********************************
+Using default tracefiles in ./traces/
+Measuring performance with a cycle counter.
+Processor clock rate ~= 2500.0 MHz
+.............................
+Results for mm malloc:
+  valid  util   ops    secs     Kops  trace
+   yes    86%  100000  0.002341 42716 ./traces/alaska.rep
+ * yes    92%    4805  0.000849  5662 ./traces/amptjp.rep
+ * yes    76%    4162  0.000086 48438 ./traces/bash.rep
+ * yes    56%   57716  0.003108 18569 ./traces/boat.rep
+ * yes    94%    5032  0.000679  7411 ./traces/cccp.rep
+ * yes    74%   11991  0.000246 48814 ./traces/chrome.rep
+ * yes    99%   20000  0.000292 68497 ./traces/coalesce-big.rep
+   yes    66%   14400  0.000134107467 ./traces/coalescing-bal.rep
+   yes   100%      15  0.000004  3977 ./traces/corners.rep
+ * yes    96%    5683  0.001276  4453 ./traces/cp-decl.rep
+ u yes    71%      --        --    -- ./traces/exhaust.rep
+ * yes    75%    8000  0.000161 49549 ./traces/firefox.rep
+   yes    82%   99804  0.004126 24189 ./traces/firefox-reddit.rep
+   yes    75%     118  0.000005 24886 ./traces/hostname.rep
+ * yes    90%   19405  0.000481 40342 ./traces/login.rep
+ * yes    63%     200  0.000005 36448 ./traces/lrucd.rep
+   yes    88%     372  0.000011 34244 ./traces/ls.rep
+   yes    34%      10  0.000002  4097 ./traces/malloc.rep
+   yes    28%      17  0.000002  6844 ./traces/malloc-free.rep
+ u yes    99%      --        --    -- ./traces/needle.rep
+ * yes    76%     200  0.000012 16631 ./traces/nlydf.rep
+   yes    81%    1494  0.000041 36588 ./traces/perl.rep
+ * yes    57%     200  0.000007 29346 ./traces/qyqyc.rep
+ * yes    88%    4800  0.001420  3379 ./traces/random.rep
+ * yes    85%    4800  0.001618  2966 ./traces/random2.rep
+ * yes    79%     147  0.000009 16689 ./traces/rm.rep
+ * yes    68%     200  0.000007 29212 ./traces/rulsr.rep
+ p yes     --    6495  0.001081  6010 ./traces/seglist.rep
+   yes    89%      12  0.000007  1602 ./traces/short2.rep
+18 17     80%  153836  0.011337 13569
+
+Perf index = 38 (util) & 39 (thru) = 77/100
+
+
+************************************
+*** Using segregated & first fit ***
+************************************
+
+static char *heap_listp = 0;  /* Pointer to first block */  
+static char **root = 0;        /* pointer to root of the free list to operate */
+*root = &heap_listp;
+
+ Naive Version:
+Using default tracefiles in ./traces/
+Measuring performance with a cycle counter.
+Processor clock rate ~= 2500.0 MHz
+.............................
+Results for mm malloc:
+  valid  util   ops    secs     Kops  trace
+   yes    86%  100000  0.004406 22695 ./traces/alaska.rep
+ * yes    98%    4805  0.000763  6297 ./traces/amptjp.rep
+ * yes    83%    4162  0.000179 23192 ./traces/bash.rep
+ * yes    56%   57716  0.002663 21675 ./traces/boat.rep
+ * yes    94%    5032  0.000700  7187 ./traces/cccp.rep
+ * yes    74%   11991  0.000498 24055 ./traces/chrome.rep
+ * yes    99%   20000  0.000382 52315 ./traces/coalesce-big.rep
+   yes    66%   14400  0.000155 93183 ./traces/coalescing-bal.rep
+   yes   100%      15  0.000004  3594 ./traces/corners.rep
+ * yes    98%    5683  0.001172  4849 ./traces/cp-decl.rep
+ u yes    71%      --        --    -- ./traces/exhaust.rep
+ * yes    75%    8000  0.000311 25733 ./traces/firefox.rep
+   yes    82%   99804  0.005253 19001 ./traces/firefox-reddit.rep
+   yes    75%     118  0.000008 15045 ./traces/hostname.rep
+ * yes    91%   19405  0.001076 18030 ./traces/login.rep
+ * yes    63%     200  0.000007 29589 ./traces/lrucd.rep
+   yes    88%     372  0.000020 19039 ./traces/ls.rep
+   yes    34%      10  0.000003  3659 ./traces/malloc.rep
+   yes    28%      17  0.000003  6317 ./traces/malloc-free.rep
+ u yes    99%      --        --    -- ./traces/needle.rep
+ * yes    89%     200  0.000012 17228 ./traces/nlydf.rep
+   yes    86%    1494  0.000082 18137 ./traces/perl.rep
+ * yes    86%     200  0.000007 28929 ./traces/qyqyc.rep
+ * yes    88%    4800  0.001278  3757 ./traces/random.rep
+ * yes    86%    4800  0.001356  3540 ./traces/random2.rep
+ * yes    79%     147  0.000012 12000 ./traces/rm.rep
+ * yes    68%     200  0.000008 25235 ./traces/rulsr.rep
+ p yes     --    6495  0.000346 18775 ./traces/seglist.rep
+   yes    89%      12  0.000008  1596 ./traces/short2.rep
+18 17     83%  153836  0.010770 14284
+
+Perf index = 44 (util) & 39 (thru) = 83/100

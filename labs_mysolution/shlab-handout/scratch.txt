@@ -1,0 +1,28 @@
+trace05.txt(多个后台进程)
+做这个功能的时候没有在处理前台程序以后将SIGCHLD取消屏蔽，
+导致终端死循环。原因分析：
+通过sio_puts调试发现程序停在第三行/bin/echo以后等待SIGCHLD返回的
+sigsuspend内的pause。不取消屏蔽将导致第一次运行foreground Job
+以后全部的SIGCHLD都被屏蔽。
+
+./sdriver.pl -t trace05.txt -s ./tsh -a "-p"
+#
+# trace05.txt - Process jobs builtin command.
+#
+Control reaches here 1
+tsh> ./myspin 2 &
+Control reaches here 2
+[1] (15396) ./myspin 2 &
+Control reaches here 1
+tsh> ./myspin 3 &
+
+            pid = 0;
+            Sigprocmask(SIG_SETMASK, &mask_one, NULL); /* Explicitly wait for SIGCHLD*/
+            while (!pid) {
+                sio_puts("Control reaches here 1\n");
+                sigsuspend(&prev_one);
+            }
+            
+            /* Forgot to unblock SIGCHLD here */
+
+            sio_puts("Control reaches here 2\n");

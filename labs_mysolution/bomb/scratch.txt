@@ -1,0 +1,417 @@
+PHASE_1
+//rsi 存储目标字符串地址，rdi存储输入字符串地址
+//也就是判断两个字符串相不相等的函数
+strings_not_equal (char *rsi, char *rdi) {
+    char *rbx = rdi; //现在rbx存储输入字符串
+    char *rbp = rsi; //rbp存储目标字符串
+    if (string_length(rbx) != string_length(rbp)) {
+        return 1;
+    }
+    if (*rbx == 0) {
+        return 0;
+    }
+    while (*rbx == *rbp) {
+        rbx++;
+        rbp++;
+        if (*rbx != 0) {
+            if (*rbp != *rbx) {
+                return 1
+            }
+        } else {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+//找\0得到字符串长度
+string_length (char *rdi) {
+    if (*rdi == 0) {
+        return 0;
+    }
+    rdx = rdi;
+    do {
+        rdx++;
+        eax = edx;
+        eax -= edi;
+    } while (*rdx != 0)
+    return rax;
+}
+
+PHASE_2
+//没看明白，但是过了。黑盒子函数有点难受。
+rsi + 24
+rsi + 20/ !!!rax
+rsi + 16/ !!!
+rsi + 12/ !!!r9
+rsi + 8 / !!!r8
+rsi + 4 / !!!rcx
+rsp + 24 / rsi / !!!rdx
+rsp + 20
+rsp + 16
+rsp + 12
+*rsp + 8 = *(rsi + 20)
+rsp + 4
+*rsp = *(rsi + 16)
+
+read_six_numbers (rsi) {
+    rsp -= 24;
+    rdx = rsi;
+    rcx = rsi + 4;
+    
+    rax = rsi + 20;
+    *(rsp + 8) = *rax;
+    rax = rsi + 16;
+    *rsp = *rax;
+    r9 = rsi + 12;
+    r8 = rsi + 8
+    
+    esi(即rsi后四字节) = $0x4025c3;
+
+    rax = 0;
+    __isoc99_sscanf@plt // ?????
+    if (rax > 5) {
+        rsp += 24;
+        ret;
+    }
+    else {
+        explode_bomb;
+    }
+}
+
+//rdi是用户输入
+phase_2 (char *rdi) {
+    rsp -= 24;
+    rsi = rsp;
+    read_six_numbers(rsi)
+    if (*rsp != 0x1) {
+        explode_bomb;
+    }
+    rbx = rsp + 4;
+    rbp = rsp + 24;
+    do {
+        rax = 2 * *(rbx - 4);
+        if (rax != *rbx) {
+            explode_bomb;
+        }
+        rbx += 4;
+    } while (rbp != rbx)
+    return;
+}
+从rsp往上是
+1 2 4 8 16 32
+
+PHASE_3
+rdi 为用户输入
+phase_3 (rdi) {
+    rsp -= 24;
+    rcx = rsp + 12;
+    rdx = rsp + 8;
+    esi = $0x4025cf;
+    eax = 0;
+    __isoc99_sscanf@plt // ???
+    if (rax != 1) {
+        explode_bomb
+    }
+    if (*(rsp + 8) > 7) {
+        explode_bomb
+    }
+
+}
+经调试发现，0x8(%rsp)存储用户的第一个输入，0xc(%rsp)存储第二个
+esi存储字符串内容为"%d %d %d %d %d %d"
+phase_3密码为：
+0 207
+或1 311
+或2 707
+或3 256
+或4 389
+或5 206
+或6 682
+或7 327
+
+还是谨记 x86 的函数调用约定：
+
+%rdi：第一个参数
+%rsi：第二个参数
+%rdx：第三个参数
+%rcx：第四个参数
+%r8：第五个参数
+%r9：第六个参数
+%rax：返回值
+
+PHASE_4
+观察esi，仍然是输入两个数，0x8(%rsp)为第一个，0xc第二个
+
+edx = 14, esi = 0, edi = 输入
+func4 (first, second) {
+    result = first - second; 
+    result = (result >>L 31) + result //负数加一，正数不变
+    result >>A= 1; //默认是一位，相当于整除2
+    a = result + second;
+    if (a <= edi);
+    {
+        result = 0;
+        if (a >= edi) {
+            return result;
+        }
+        second = a + 1;
+        return 1 + 2 * func(first, second);
+    } else {
+        first = a - 1;
+        return 2 * func4(first, second);
+    }
+
+}
+
+phase_4 (char *rdi) {
+    rsp -= 24;
+    rcx = rsp + 0xc; 第二个
+    rdx = rsp + 0x8; 第一个
+    
+    if (*0x8(%rsp) > 0xe) {
+        explode_bomb;
+    }
+    //第一个数小于等于0xe，也就是14及以下
+
+    edx = 0xe;
+    esi = 0x0;
+    edi = *(rsp + 0x8);
+    func4();
+    if (eax != 0) {
+        explode_bomb;
+    }
+    //func4返回值是零
+    if (*(rsp + 0xc) == 0) {
+        return;
+    }
+    explode_bomb;
+    //第二个数强制为零
+}
+
+答案为7 0
+
+PHASE_5
+引入了Canary防止buffer overflow。但好像不用管？
+
+phase_5 (char *rdi) {
+    rsp -= 32;
+    rbx = rdi;
+
+    rax = %fs:0x28
+    *(%rsp + 24) = rax;
+    //canary值
+
+    rax = 0;
+    if (string_length(rdi) != 6) {
+        explode_bomb
+    }
+    //输入的字符串长度为6
+    
+    // rbx = rdi
+    rax = 0;
+    do {
+        rcx = *(rbx + rax)_byte;
+        *rsp = rcx_byte
+        rdx = *rsp;
+        rdx &= 0xf //取4bit
+        rdx = *0x4024b0(%rdx);
+        *(16 + rsp + rax) = rdx_byte
+        rax++;
+    } while (rax != 6)
+    *(rsp + 22) = 0;
+    rsi = $0x40245e;
+    rdi = rsp + 16;
+    if (strings_not_equal(rsi, rdi)) {
+        explode_bomb;
+    }
+    
+    //以下canary
+    rax = *(rsp + 24);
+    if (rax != %fs:0x28) {
+        return fail;
+    }
+    return;
+}
+
+从0x4024b0开始为：
+maduiersnfotvbyl
+0x40245e处是：
+flyers
+rdi中六个ascii字符二进制表示的后四位应该满足值为  9 15 14 5 6 7
+结合ascii表可以是 I O N E F G
+对了！爽到！！！
+
+PHASE_6
+
+//使用的读入是read_six_numbers。没有canary部分
+phase_6 (char *rdi) {
+    rsp -= 80;
+    r13 = rsp;
+    rsi = rsp;
+
+    read_six_numbers();
+    //经调试得到 *rsp 到 *(rsp + 20)存储输入的六位数字
+
+    r14 = rsp;
+    r12d = 0x0;
+.L14:
+    rbp = r13 //第一次时rbp = rsp
+    rax = *(r13) //第一次时rax = *(rsp)，后面为+4 +8 ...
+    rax -= 1;
+    if (rax > 5) { 
+        //翻译得有一些偏差，注意这里rax为0的时候减1和0x5比较是unsigned,
+        //因为这里算是地址比较，没有负数，会炸
+        explode_bomb;
+    } //第i次rax存储的是第i个值，即第i个值 <= 6
+    r12d += 1;
+    if (r12d == 0x6) goto .L53;
+    ebx = r12d;
+.L35:
+    rax = ebx (sign_extension);
+    eax = *(rsp + 4 * rax);
+    if (eax == *(rbp)) explode_bomb; //如果有数相等，爆炸。即各不相等
+    ebx += 1;
+    if (ebx <= 5) goto .L35
+    //该循环检测是否有相等的数
+
+    r13 += 4;
+    goto .L14
+
+//第一循环体说明输入的六位数小于等于6 且各不相等
+//更正：输入是六位数1 2 3 4 5 6的一个排列
+------------------------------------------------------ 
+.L53:
+    rsi = rsp + 24;
+    rax = r14; // rax = rsp
+    rcx = 7;
+
+.L60:
+    rdx = rcx;
+    rdx -= *(rax);
+    *(rax) = rdx;
+    rax += 4;
+    if (rax != rsi) 
+        goto .L60
+//.L60循环把 i 变为 7 - i
+
+    esi = 0;
+        goto .L97
+.L76:
+    rdx = *(rdx + 8);
+    eax++;
+    if (eax != ecx) 
+        goto .L76 //当遇到大于1的数后，调到当前数对应的链表节点
+        
+        goto .L88
+.AssignEDX:
+    edx = $0x6032d0;
+.L88:
+    *(rsp + 2 * rsi + 32) = rdx;
+    rsi += 4;
+    if (rsi == 24) 
+        goto .L8(4011ab) //只有这里可以离开循环，所以rsi从0 到 20
+                         //遍历六个数字
+.L97:
+    ecx = *(rsp + rsi);
+    if (ecx <= 1) 
+        goto .AssignEDX
+    eax = 1;
+    edx = $0x6032d0
+        goto .L76
+//观察$0x6032d0这一位置存储的数据结构，应该是链表，<node1> - <node6>值为：
+// 332 168 924 691 477 443
+//结构为前八位储存当前节点数值地址，后八位存储下一节点地址。
+------------------------------------------------------ 
+.L8:
+    //rsp + 32 到 rsp + 72，每个8bit存储链表的一个节点的地址
+    rbx = *(rsp + 0x20); // *(rsp + 32)
+    rax = rsp + 0x28; // rsp + 40
+    rsi = rsp + 0x50; // rsp + 80
+    rcx = rbx; //rcx直接是节点的地址，*(rcx + 8)为下一个节点的地址
+.BD:
+    rdx = *(rax)
+    *(rcx + 8) = rdx;
+    rax += 8;
+    if (rax == rsi) goto .D2
+    rcx = rdx;
+    goto .BD
+//按照栈上地址从小到大更改链表节点的指向
+
+.D2:
+    *(rdx + 8) = 0; //链表最后一个节点指向null
+    ebp = 5;
+.DF: //从链表第一个数开始，前一个数大于等于后一个数，注意也是Unsigned比较
+    rax = *(rbx + 8);
+    eax = *(rax);
+    if (*(rbx) < eax) explode_bomb;
+    rbx = *(rbx + 8);
+    ebp -= 1;
+    if (ebp != 0) goto .DF
+    
+    return;
+
+}
+节点顺序为
+3 4 5 6 1 2 -> 反一下 ->
+4 3 2 1 6 5
+对了！！！
+
+我看有一个<secret_phase>，想想看怎么触发，在phase_defused里有可能被调用。
+答案：phase_defused里调用了phase_4中输入的内容进行比较，在7 0后加DrEvil即可触发彩蛋
+（看攻略了，真没找出来，那个7 0着实有点莫名其妙，以为是内置的改不了呢）
+
+SECRET_PHASE
+
+secret_phase () {
+    edx = 0xa; // edx = 10
+    esi = 0;
+    rdi = rax; //输入字符串char *
+
+    strtol() //将输入字符串转化为long
+    rbx = rax;
+    eax = rax - 1
+    if (eax > $0x3e8)
+        explode_bomb;
+    //如上输入一个数并保存在rax里，rax <= 1001
+    //ebx = rax
+
+    esi = ebx; //esi = rax
+    edi = $0x6030f0; // <n1>: "$" 36
+    fun7();
+    if (eax != 2)
+        explode_bomb; //fun7返回值为2
+
+    return;
+}
+
+ebx = input;  edi = <n1>; esi = input
+//edi是个链表/树。rdi = 0即链表走到null时fun7()返回-1，那么
+//关键是查找树多少个节点，值是什么以及怎么走fun7()使返回值为2
+//很像是二分查找
+fun7 () {
+    if (rdi == 0) 
+        return 0xffffffff;
+
+    edx = *(rdi)
+    if (edx <= esi) {
+        if (edx == esi) {
+            return 0;
+        }
+        else { //节点数据小于输入的数，+16，否则+8
+            rdi = *(rdi + 16)
+            return 1+ 2 * fun7();
+        }
+    }
+    rdi = *(rdi + 8);
+    return 2 * fun7();
+}
+尝试不同数据作图，画出查找树结构即可。
+                <n1>
+                 36
+            <n22> <n21>
+              50    8
+      <n34> <n33> <n32> <n31>
+       107    45    22    6
+<n48> <n47> <n46> <n45> <n44> <n43> <n42> <n41>
+1001    99    47    40    35   20     7     1

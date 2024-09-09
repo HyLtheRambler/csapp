@@ -1,0 +1,197 @@
+C = 1024 bytes 256 ints
+B = 32 bytes = 8 ints
+S = 32
+sizeof(int) = 4 bytes
+cache: 256 ints
+
+/**************************** 32 * 32 ****************************/
+
+        **0. Basics**
+
+A[i][j] = *(A + 32 * i + j)
+A according set: (4 * i + j / 8) % 32
+B[j][i] = *(B + 32 * j + i)
+B according set: (4 * j + i / 8) % 32
+
+32 * 32 -> 4 * 4 of (8 * 8 blocks)
+在 8 * 8 分块内部, j 对 set index 没有影响。
+
+        **1.WITHOUT loop unrolling, got 343 misses**
+
+Analysis:
+in Diagonal Blocks:
+L/S
+A/B
+m/m m/m h/h h/h h/h h/h h/h
+m/m h/m m/m h/h h/h h/h h/h
+m/m h/h h/m m/m h/h h/h h/h
+m/m h/h h/h h/m m/m h/h h/h
+m/m h/h h/h h/h h/m m/m h/h
+m/m h/h h/h h/h h/h h/m m/m
+m/m h/h h/h h/h h/h h/h h/m
+ABAB
+BABAB
+BABAB
+BABAB
+BABAB
+BABAB
+BABAB
+BAB
+(approximately 4 - 5 misses per line)
+5 * 6 + 4 + 3 = 37
+37 * 4 = 148
+
+in nondiagonal blocks, j / 8 and i / 8 will lead to different
+mod 4 of set index. thus no conflict occurs. so in nondiagonal blocks, we get:
+12 * 16 = 192
+
+the result is 148 + 192 = 343  misses close to the 343 result.
+
+        **2. loop unrolling, using 8 local vars.**
+
+12 * 16 = 192.
+in Diagonal blocks:
+AB
+BAB
+BAB
+BAB
+BAB
+BAB
+BAB
+BAB
+3 * 7 + 2 = 23
+23 * 4 + 192 = 284 misses
+
+        **3.transpose after done loading to B**
+
+strictly 256 misses.
+Analysis:
+each set caching 8 ints in A is loaded into local vars,
+then B override that set and got written.
+
+/**************************** 64 * 64 ****************************/
+
+target: m < 1300
+
+        **0. Basics      *******
+
+A set index: (8 * i + j / 8) % 32
+B set index: (8 * j + i / 8) % 32
+conflict misses occurs inside the 8 * 8 blocks as 8 * 0 % 32 == 8 * 4 % 32
+
+        **1. reduce block size**
+
+reduce to 4 * 4 size will solve the conflict misses and we got 1600 misses.
+Analysis:
+4 * 4 * 256 = 64 * 64
+it is not simply 256 * 8 = 2048.
+Loading A may be hit when B doesn't evict components of A in cache.
+it can happen when the block of B being stored has different modulo of 8 from that of
+the next block of A.
+
+each B blocks has 4 misses when stored
+256 * 4 = 1024. 1600 - 1024 = 576
+approximately, half of A got hit except for the diagonal cases.
+
+A/B 4*4 blocks set index occupation map (mod 8):
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7
+
+here, 1m = 4 misses
+A Miss/Hit map (A from 0 to 7 while B remains the same column. Not hard to draw)
+m m m h m h m h m h m h m h m h
+m m m h m h m h m h m h m h m h
+m h m m m h m h m h m h m h m h
+m h m m m h m h m h m h m h m h
+m h m h m m m h m h m h m h m h
+m h m h m m m h m h m h m h m h
+m h m h m h m m m h m h m h m h
+...
+when A have the same modulo of 8 set index with B, there is an extra miss.
+Otherwise, storing B doesn't override A block in cache and there will be hit.
+each line has 9 m which equals to 36 misses
+36 * 16 = 576. That's reasonable.
+
+        * 2. 4 * 8 blocks ******
+
+we can try loading 4 * 8 of A temporarily into "wrong" blocks of B
+to avoid misses of storing B;
+
+in a 8 * 8 blocks, A and B are nondiagonal blocks:
+
+A1 A2   B1 B2
+
+A3 A4   B3 B4
+
+First, read A1, A2 (row-wise) into B1, B2, and transpose them;
+next, read B2(row-wise) and A3 (COLUMN-wise for row-wise writing of B)
+(Read A3 misses the first time) 
+write the 4 ele row from A3 into B2(hit)
+write the 4 ele row from B2 into B3(miss)
+(at this time, the first line of B2 in cache get evicted)
+
+thus for nondiagonal 8*8 blocks, we can make half of B hit,
+as the read and write of B2 and B4 will all hit.
+
+finally we get 1155 misses.
+Analysis:
+Both A and B have the same Miss/Hit map as listed above.
+36 * 16 * 2 = 1152 misses. reasonable.
+
+
+/**************************** 61 * 67 ****************************/
+
+        **0. Basics      **
+
+[i][j] = *(A + 67 * i + j)
+set index = (8 * i + (3 * i + j) / 8) % 32
+
+61 = 7 * 8 + 5
+67 = 8 * 8 + 3
+
+assume that there is no conflict misses.
+then we only have to deal with the leftovers.
+
+        ** 1. 8*8 blocks, 1 by 1 leftovers **
+
+we got 2216 misses. that's close, yet not good enough.
+conflict misses may still occur and it's hard to count them all.
+consider blocking the leftovers as well. load before transpose.
+
+
+        ** 1. 8*8 blocks, blocked leftovers **
+
+fucking 2006 misses.
+I applied 5 * 5 and 3 * 3 blocking to reduce misses.
+the final tiny leftovers can also be blocked in a kinda strange way.
+
+I don't know why I got 2008 misses after get the leftovers blocked too..
+analysis:
+
+56 * 8 * 2 + 10 * 13 + 18 * 6
+
+Ohh I'm dumb. Why not use 5 * 8 and 3 * 8 ?
+The blocks don't have to be square.
+why the miss count rises..I go back to the 5 * 5 and 3 * 3.
+
+after applying storing before transposing to 5 * 5 blocks,
+get 1998 misses.
+
+in this case, loading before transposing will increase total misses
+in the 8 * 8 blocks. I don't know exactly why, but it also reveals
+that one approach doesn't always bring the best result. Experiments count.

